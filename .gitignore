@@ -1,0 +1,17 @@
+# Catkin build artifacts
+catkin_ws/build/
+catkin_ws/devel/
+catkin_ws/install/
+catkin_ws/logs/
+
+# ROS generated files
+*.pyc
+__pycache__/
+
+# IDE/editor files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
