@@ -22,6 +22,10 @@ public class DroneFlightController : MonoBehaviour {
     [SerializeField] private float linearDamping = 0.5f;
     [SerializeField] private float angularDamping = 5f;
 
+    [Header("Cargo")]
+    [SerializeField] private DronePickupZone pickupZone;
+    [SerializeField] private float cargoGroundClearance = 0.05f;
+
     [Header("ROS")]
     [SerializeField] private float commandTimeout = 0.5f;
 
@@ -53,11 +57,11 @@ public class DroneFlightController : MonoBehaviour {
 
         targetYaw = transform.eulerAngles.y;
 
-	if (Manager.Instance.UseROS) {
+        if (Manager.Instance.UseROS) {
+            ros = ROSConnection.GetOrCreateInstance();
+            ros.Subscribe<TwistMsg>(topicName, ReceiveCommand);
+        }
 
-        ros = ROSConnection.GetOrCreateInstance();
-        ros.Subscribe<TwistMsg>(topicName, ReceiveCommand);
-	}
         command = new TwistMsg();
         lastCommandTime = -999f;
 
@@ -117,6 +121,18 @@ public class DroneFlightController : MonoBehaviour {
 
     private void ControlThrust(float verticalCommand) {
         float targetVerticalSpeed = verticalCommand * maxVerticalSpeed;
+
+        if (targetVerticalSpeed < 0f && CargoIsNearGround()) {
+            targetVerticalSpeed = 0f;
+
+            Vector3 velocity = body.velocity;
+
+            if (velocity.y < 0f) {
+                velocity.y = 0f;
+                body.velocity = velocity;
+            }
+        }
+
         float verticalError = targetVerticalSpeed - body.velocity.y;
         float weight = totalMass * Physics.gravity.magnitude;
 
@@ -139,5 +155,87 @@ public class DroneFlightController : MonoBehaviour {
          * movement.
          */
         body.AddForce(transform.up * totalThrust);
+    }
+
+    private bool CargoIsNearGround() {
+        if (pickupZone == null || !pickupZone.IsCarrying) {
+            return false;
+        }
+
+        BoxCollider proxy = pickupZone.CarriedCollider;
+
+        if (proxy == null) {
+            return false;
+        }
+
+        Vector3 center = proxy.transform.TransformPoint(proxy.center);
+
+        Vector3 halfExtents = Vector3.Scale(
+            proxy.size * 0.5f,
+            AbsVector(proxy.transform.lossyScale)
+        );
+
+        Collider[] overlaps = Physics.OverlapBox(
+            center,
+            halfExtents,
+            proxy.transform.rotation,
+            ~0,
+            QueryTriggerInteraction.Ignore
+        );
+
+        foreach (Collider collider in overlaps) {
+            if (ShouldIgnoreCargoCollision(collider)) {
+                continue;
+            }
+
+            return true;
+        }
+
+        RaycastHit[] hits = Physics.BoxCastAll(
+            center,
+            halfExtents,
+            Vector3.down,
+            proxy.transform.rotation,
+            cargoGroundClearance,
+            ~0,
+            QueryTriggerInteraction.Ignore
+        );
+
+        foreach (RaycastHit hit in hits) {
+            if (ShouldIgnoreCargoCollision(hit.collider)) {
+                continue;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool ShouldIgnoreCargoCollision(Collider collider) {
+        if (collider == null) {
+            return true;
+        }
+
+        if (collider.transform.IsChildOf(transform.root)) {
+            return true;
+        }
+
+        if (
+            pickupZone.CarriedObject != null &&
+            collider.transform.IsChildOf(pickupZone.CarriedObject.transform)
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private Vector3 AbsVector(Vector3 value) {
+        return new Vector3(
+            Mathf.Abs(value.x),
+            Mathf.Abs(value.y),
+            Mathf.Abs(value.z)
+        );
     }
 }
