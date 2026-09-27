@@ -1,17 +1,105 @@
+# ============================================================
+# Unity
+# ============================================================
+
+# Unity generated/cache folders
+[Dd]rone [Ss]imulation/[Ll]ibrary/
+[Dd]rone [Ss]imulation/[Tt]emp/
+[Dd]rone [Ss]imulation/[Oo]bj/
+[Dd]rone [Ss]imulation/[Ll]ogs/
+[Dd]rone [Ss]imulation/[Uu]ser[Ss]ettings/
+
+# Unity builds
+[Dd]rone [Ss]imulation/[Bb]uild/
+[Dd]rone [Ss]imulation/[Bb]uilds/
+
+# Unity generated IDE project files
+[Dd]rone [Ss]imulation/*.csproj
+[Dd]rone [Ss]imulation/*.sln
+[Dd]rone [Ss]imulation/*.suo
+[Dd]rone [Ss]imulation/*.user
+[Dd]rone [Ss]imulation/*.userprefs
+[Dd]rone [Ss]imulation/*.pidb
+[Dd]rone [Ss]imulation/*.booproj
+[Dd]rone [Ss]imulation/*.svd
+
+# Visual Studio
+[Dd]rone [Ss]imulation/.vs/
+
+# Unity crash / profiler / temporary output
+sysinfo.txt
+*.stackdump
+*.pidb.meta
+*.pdb
+*.mdb
+
+# Unity memory captures / recordings
+[Dd]rone [Ss]imulation/[Mm]emoryCaptures/
+[Dd]rone [Ss]imulation/[Rr]ecordings/
+
+
+# ============================================================
+# ROS / Catkin
+# ============================================================
+
 # Catkin build artifacts
 catkin_ws/build/
 catkin_ws/devel/
 catkin_ws/install/
 catkin_ws/logs/
 
-# ROS generated files
-*.pyc
-__pycache__/
+# catkin_tools build artifacts
+catkin_ws/.catkin_tools/
 
-# IDE/editor files
+# ROS runtime/log files
+.ros/
+*.bag
+*.bag.active
+
+# Python generated files
+__pycache__/
+*.py[cod]
+*$py.class
+
+
+# ============================================================
+# IDE / Editor
+# ============================================================
+
 .vscode/
 .idea/
 
-# OS files
+# Vim
+*.swp
+*.swo
+*~
+
+# Generic temporary files
+*.tmp
+*.temp
+*.bak
+
+
+# ============================================================
+# Logs
+# ============================================================
+
+*.log
+
+
+# ============================================================
+# OS generated files
+# ============================================================
+
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
 Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+.directory
