@@ -16,7 +16,7 @@ public class DroneFlightController : MonoBehaviour {
 
     [Header("Vertical Movement")]
     [SerializeField] private float maxVerticalSpeed = 2f;
-    [SerializeField] private float verticalStrength = 4f;
+    [SerializeField] private float verticalStrength = 4f; // inverse of time for velocity change
 
     [Header("Physics")]
     [SerializeField] private float linearDamping = 0.5f;
@@ -53,16 +53,18 @@ public class DroneFlightController : MonoBehaviour {
 
         targetYaw = transform.eulerAngles.y;
 
+	if (Manager.Instance.UseROS) {
+
         ros = ROSConnection.GetOrCreateInstance();
         ros.Subscribe<TwistMsg>(topicName, ReceiveCommand);
-
+	}
         command = new TwistMsg();
         lastCommandTime = -999f;
 
         Debug.Log("Total drone mass: " + totalMass);
     }
 
-    private void ReceiveCommand(TwistMsg message) {
+    public void ReceiveCommand(TwistMsg message) {
         command = message;
         lastCommandTime = Time.time;
     }
@@ -96,23 +98,12 @@ public class DroneFlightController : MonoBehaviour {
         float forwardError = targetForwardSpeed - currentForwardSpeed;
         float leftError = targetLeftSpeed - currentLeftSpeed;
 
-        /*
-         * Forward velocity error -> pitch.
-         *
-         * Positive pitch tilts the drone forward.
-         */
         float targetPitch = Mathf.Clamp(forwardError * tiltStrength, -maxTiltAngle, maxTiltAngle);
-
-        /*
-         * Positive roll tilts the drone toward its left side,
-         * matching ROS +Y = left.
-         */
         float targetRoll = Mathf.Clamp(leftError * tiltStrength, -maxTiltAngle, maxTiltAngle);
 
         targetYaw += yawCommand * maxYawRate * Time.fixedDeltaTime;
 
         Quaternion targetRotation = Quaternion.Euler(targetPitch, targetYaw, targetRoll);
-
         Quaternion newRotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
 
         body.TeleportRoot(transform.position, newRotation);
@@ -126,25 +117,19 @@ public class DroneFlightController : MonoBehaviour {
 
     private void ControlThrust(float verticalCommand) {
         float targetVerticalSpeed = verticalCommand * maxVerticalSpeed;
-
         float verticalError = targetVerticalSpeed - body.velocity.y;
-
         float weight = totalMass * Physics.gravity.magnitude;
 
         /*
          * When the drone tilts, transform.up is no longer completely
          * vertical, so increase total thrust to compensate.
          */
-        float verticalRatio = Vector3.Dot(transform.up, Vector3.up);
-
-        verticalRatio = Mathf.Clamp(verticalRatio, 0.4f, 1f);
+        float verticalRatio = Vector3.Dot(transform.up, Vector3.up); // 1 when they match (upright), 0 when orthogonal (sideway)
+        verticalRatio = Mathf.Clamp(verticalRatio, 0.4f, 1f); // drone can only tilt by 60deg
 
         float hoverForce = weight / verticalRatio;
-
         float verticalCorrection = verticalError * verticalStrength * totalMass;
-
         float totalThrust = hoverForce + verticalCorrection;
-
         totalThrust = Mathf.Max(0f, totalThrust);
 
         /*

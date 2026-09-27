@@ -48,10 +48,13 @@
   </PropertyGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\TwistPublisher.cs" />
+     <Compile Include="Assets\Scripts\Pickupable.cs" />
      <Compile Include="Assets\RosMessages\HectorUav\srv\EnableMotorsRequest.cs" />
      <Compile Include="Assets\Scripts\DroneFlightController.cs" />
+     <Compile Include="Assets\CameraFollowDrone.cs" />
      <Compile Include="Assets\Scripts\TwistSubscriber.cs" />
      <Compile Include="Assets\RosMessages\HectorUav\srv\EnableMotorsResponse.cs" />
+     <Compile Include="Assets\Scripts\DroneKeyboardPublisher.cs" />
  <Reference Include="UnityEngine">
  <HintPath>/home/phuctohuynh/Unity/Hub/Editor/2020.3.49f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
  </Reference>

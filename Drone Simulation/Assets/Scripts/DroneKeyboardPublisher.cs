@@ -4,12 +4,16 @@ using UnityEngine;
 
 public class DroneKeyboardPublisher : MonoBehaviour {
     [SerializeField] private string topicName = "/drone/cmd_vel";
+    
+    [SerializeField] private DroneFlightController controller;
 
     private ROSConnection ros;
 
     private void Start() {
-        ros = ROSConnection.GetOrCreateInstance();
-        ros.RegisterPublisher<TwistMsg>(topicName);
+	    if (Manager.Instance.UseROS) {
+		ros = ROSConnection.GetOrCreateInstance();
+		ros.RegisterPublisher<TwistMsg>(topicName);
+        }
     }
 
     private void FixedUpdate() {
@@ -44,13 +48,17 @@ public class DroneKeyboardPublisher : MonoBehaviour {
 
         // Yaw left / right
         if (Input.GetKey(KeyCode.Q)) {
-            message.angular.z = 1.0;
-        }
-
-        if (Input.GetKey(KeyCode.E)) {
             message.angular.z = -1.0;
         }
 
-        ros.Publish(topicName, message);
+        if (Input.GetKey(KeyCode.E)) {
+            message.angular.z = 1.0;
+        }
+
+	if (Manager.Instance.UseROS) {
+            ros.Publish(topicName, message);
+        } else {
+        	controller.ReceiveCommand(message);
+        }
     }
 }
