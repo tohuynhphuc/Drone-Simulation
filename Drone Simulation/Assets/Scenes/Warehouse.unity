@@ -762,6 +762,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1400444922}
     m_Modifications:
+    - target: {fileID: 1551031970686249827, guid: c56f9259754eb53438e0054bddf24587, type: 3}
+      propertyPath: packageType
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1551031970686249838, guid: c56f9259754eb53438e0054bddf24587, type: 3}
       propertyPath: m_Name
       value: DropZoneRed
@@ -1505,6 +1509,36 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1453485022173259434, guid: eb4b38db67a56dc469a2c2aafcc36add, type: 3}
   m_PrefabInstance: {fileID: 716381987}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &621891243
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 621891244}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &621891244
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 621891243}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 11.129949, y: 3.403211, z: 13.845871}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 11
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &632636658 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6075935952854798076, guid: f76547efa76f4384595c8ea73969b976, type: 3}
