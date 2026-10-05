@@ -39,10 +39,10 @@ public class DronePickupZone : MonoBehaviour {
         }
     }
 
-    private void Pickup() {
+    public bool Pickup() {
         if (nearbyObject == null) {
             Debug.Log("No object close enough to pick up.");
-            return;
+            return false;
         }
 
         carriedObject = nearbyObject;
@@ -67,6 +67,7 @@ public class DronePickupZone : MonoBehaviour {
         carriedObject.transform.localRotation = Quaternion.identity;
 
         Debug.Log("Picked up: " + carriedObject.name);
+        return carriedObject != null;
     }
 
     private void Drop() {

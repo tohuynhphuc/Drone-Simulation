@@ -1,3 +1,4 @@
+using System.Collections;
 using RosMessageTypes.Geometry;
 using Unity.Robotics.ROSTCPConnector;
 using Unity.Robotics.ROSTCPConnector.ROSGeometry;
@@ -11,44 +12,57 @@ public class MoveToPointPublisher : MonoBehaviour {
 
     [Header("Objects")]
     [SerializeField] private Transform drone;
-    [SerializeField] private Transform target;
 
     [Header("Pose Publishing")]
     [SerializeField] private float posePublishRate = 20f;
 
     private ROSConnection ros;
     private float nextPosePublishTime;
+    private bool initialized = false;
+    private Coroutine goalPublishCoroutine;
+    
+    [SerializeField] private Transform target;
+[SerializeField] private float goalPublishRate = 10f;
+
+[SerializeField] private float targetHeightOffset = 0.8f;
+
+private float nextGoalPublishTime;
 
     private void Start() {
-        if (!Manager.Instance.UseROS) {
-            return;
-        }
+        InitializeROS();
+    }
+
+    private void InitializeROS() {
+        if (initialized || Manager.Instance == null || !Manager.Instance.UseROS) return;
 
         ros = ROSConnection.GetOrCreateInstance();
-
         ros.RegisterPublisher<PointMsg>(goalTopic);
         ros.RegisterPublisher<PoseStampedMsg>(poseTopic);
+
+        initialized = true;
+        Debug.Log("MoveToPointPublisher initialized");
     }
 
     private void Update() {
-        if (!Manager.Instance.UseROS) {
-            return;
-        }
+	    if (Manager.Instance == null || !Manager.Instance.UseROS) return;
 
-        if (Time.time >= nextPosePublishTime) {
-            PublishPose();
+	    InitializeROS();
+	    if (!initialized) return;
 
-            nextPosePublishTime = Time.time + 1f / posePublishRate;
-        }
+	    if (Time.time >= nextPosePublishTime) {
+		PublishPose();
+		nextPosePublishTime = Time.time + 1f / posePublishRate;
+	    }
 
-        if (Input.GetKeyDown(KeyCode.G)) {
-            PublishGoal();
-        }
-    }
+	    if (target != null && Time.time >= nextGoalPublishTime) {
+		Vector3 goalPosition = target.position + Vector3.up * targetHeightOffset;
+PublishGoal(goalPosition);
+		nextGoalPublishTime = Time.time + 1f / goalPublishRate;
+	    }
+	}
 
     private void PublishPose() {
         PoseStampedMsg message = new PoseStampedMsg();
-
         message.header.frame_id = "map";
         message.pose.position = drone.position.To<FLU>();
         message.pose.orientation = drone.rotation.To<FLU>();
@@ -56,9 +70,27 @@ public class MoveToPointPublisher : MonoBehaviour {
         ros.Publish(poseTopic, message);
     }
 
-    private void PublishGoal() {
-        PointMsg message = target.position.To<FLU>();
-        ros.Publish(goalTopic, message);
-        Debug.Log($"Published goal: {target.position}");
+    public void PublishGoal(Vector3 targetPosition) {
+    InitializeROS();
+    if (!initialized) return;
+
+    PointMsg message = targetPosition.To<FLU>();
+    ros.Publish(goalTopic, message);
+}
+
+public void SetTarget(Transform newTarget) {
+    target = newTarget;
+}
+
+    private IEnumerator PublishGoalRoutine(Vector3 targetPosition) {
+        PointMsg message = targetPosition.To<FLU>();
+
+        for (int i = 0; i < 10; i++) {
+            ros.Publish(goalTopic, message);
+            Debug.Log($"Published ROS goal #{i + 1}: ({message.x:F2}, {message.y:F2}, {message.z:F2})");
+            yield return new WaitForSeconds(0.2f);
+        }
+
+        goalPublishCoroutine = null;
     }
 }

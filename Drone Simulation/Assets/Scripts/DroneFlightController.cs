@@ -84,7 +84,7 @@ public class DroneFlightController : MonoBehaviour {
             forwardCommand = Mathf.Clamp((float)command.linear.x, -1f, 1f);
             sidewaysCommand = Mathf.Clamp((float)command.linear.y, -1f, 1f);
             verticalCommand = Mathf.Clamp((float)command.linear.z, -1f, 1f);
-            yawCommand = Mathf.Clamp((float)command.angular.z, -1f, 1f);
+            yawCommand = Mathf.Clamp((float)-command.angular.z, -1f, 1f);
         }
 
         ControlRotation(forwardCommand, sidewaysCommand, yawCommand);

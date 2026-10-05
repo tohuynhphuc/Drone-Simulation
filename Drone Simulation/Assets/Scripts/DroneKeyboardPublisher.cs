@@ -48,11 +48,11 @@ public class DroneKeyboardPublisher : MonoBehaviour {
 
         // Yaw left / right
         if (Input.GetKey(KeyCode.Q)) {
-            message.angular.z = -1.0;
+            message.angular.z = 1.0;
         }
 
         if (Input.GetKey(KeyCode.E)) {
-            message.angular.z = 1.0;
+            message.angular.z = -1.0;
         }
 
         if (Manager.Instance.UseROS) {

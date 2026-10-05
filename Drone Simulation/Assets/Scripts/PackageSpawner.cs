@@ -21,6 +21,8 @@ public class PackageSpawner : MonoBehaviour {
 
         for (int i = 0; i < numberOfSpawns; i++) {
             GameObject package = Instantiate(packagePrefab.gameObject);
+            
+            package.transform.SetParent(transform);
 
             Vector3 randomOffset = new Vector3(
                 (Random.value * 2 - 1) * halfWidth,
