@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class DropZone : MonoBehaviour {
 
-    [SerializeField] private PackageType packageType;
+    [SerializeField] public PackageType packageType;
     [SerializeField] private MeshRenderer meshRenderer;
 
 

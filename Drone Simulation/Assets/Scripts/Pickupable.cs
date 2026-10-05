@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Pickupable : MonoBehaviour {
 
-    [SerializeField] private PackageType packageType;
+    [SerializeField] public PackageType packageType;
 
     [SerializeField] private MeshRenderer meshRenderer;
 

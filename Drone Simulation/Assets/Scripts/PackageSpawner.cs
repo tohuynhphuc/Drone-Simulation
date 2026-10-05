@@ -8,7 +8,7 @@ public class PackageSpawner : MonoBehaviour {
     [SerializeField] private float halfLength = 5f;
     [SerializeField] private float halfHeight = 1f;
 
-    [SerializeField] private int numberOfSpawns = 40;
+    [SerializeField] public int numberOfSpawns = 40;
 
     [SerializeField] private Pickupable packagePrefab;
 

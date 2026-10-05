@@ -70,7 +70,7 @@ public class DronePickupZone : MonoBehaviour {
         return carriedObject != null;
     }
 
-    private void Drop() {
+    public void Drop() {
         if (carriedObject == null) {
             return;
         }
