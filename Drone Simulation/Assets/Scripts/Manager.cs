@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Manager : MonoBehaviour {
@@ -36,71 +35,70 @@ public class Manager : MonoBehaviour {
     }
 
     private void Start() {
-        if (useROS) {
-            StartCoroutine(SortPackages());
-        }
+        if (useROS) StartCoroutine(SortPackages());
     }
 
     private IEnumerator SortPackages() {
-    moveToPointPublisher.SetTarget(drone.transform);
-        yield return new WaitUntil(() => packagesParent != null && packagesParent.transform.childCount >= packagesParent.GetComponent<PackageSpawner>().numberOfSpawns);
+        moveToPointPublisher.ClearTarget();
 
-        List<Transform> packages = new List<Transform>();
+        yield return new WaitUntil(() =>
+            packagesParent != null &&
+            packagesParent.transform.childCount >= packagesParent.GetComponent<PackageSpawner>().numberOfSpawns
+        );
 
-        foreach (Transform package in packagesParent.transform) {
-            packages.Add(package);
-        }
-
-        foreach (Transform package in packages) {
-            if (package == null) continue;
-
-            Pickupable pickupable = package.GetComponent<Pickupable>();
-
-            if (pickupable == null) {
-                Debug.LogWarning(package.name + " does not have Pickupable.");
-                continue;
-            }
-
-            DropZone dropZone = FindDropZone(pickupable.packageType);
-
-            if (dropZone == null) {
-                Debug.LogWarning("No drop zone found for package type " + pickupable.packageType);
-                continue;
-            }
-
-            yield return StartCoroutine(PickupAndDeliver(package, dropZone));
+        while (packagesParent.transform.childCount > 0) {
+            Transform targetPackage = packagesParent.transform.GetChild(0);
+            yield return StartCoroutine(PickupAndDeliver(targetPackage));
         }
 
         moveToPointPublisher.ClearTarget();
         Debug.Log("Finished sorting all packages.");
     }
 
-    private IEnumerator PickupAndDeliver(Transform package, DropZone dropZone) {
-        Debug.Log("Going to package: " + package.name);
+    private IEnumerator PickupAndDeliver(Transform targetPackage) {
+        Debug.Log("Going toward package position: " + targetPackage.name);
 
-        moveToPointPublisher.SetTarget(package);
+        moveToPointPublisher.SetTarget(targetPackage);
 
         yield return new WaitUntil(() => {
-            Vector3 targetPosition = package.position + Vector3.up * pickupHoverHeight;
+            if (targetPackage == null) return true;
+
+            Vector3 targetPosition = targetPackage.position + Vector3.up * pickupHoverHeight;
             return Vector3.Distance(drone.position, targetPosition) < arrivalDistance;
         });
-
-        Debug.Log("Reached package: " + package.name);
 
         yield return new WaitForSeconds(settleTime);
 
         bool pickedUp = pickupZone.Pickup();
 
-        if (!pickedUp) {
-            Debug.LogWarning("Failed to pick up " + package.name);
+        if (!pickedUp || pickupZone.CarriedObject == null) {
+            Debug.LogWarning("Failed to pick up a package.");
             moveToPointPublisher.ClearTarget();
             yield break;
         }
 
-        Debug.Log("Picked up: " + package.name);
+        GameObject actualPackage = pickupZone.CarriedObject.gameObject;
+        Pickupable pickupable = pickupZone.CarriedObject;
+
+        if (pickupable == null) {
+            Debug.LogWarning("Picked up object " + actualPackage.name + " does not have Pickupable.");
+            moveToPointPublisher.ClearTarget();
+            pickupZone.Drop();
+            yield break;
+        }
+
+        Debug.Log("Actually picked up: " + actualPackage.name + " (" + pickupable.packageType + ")");
+
+        DropZone dropZone = FindDropZone(pickupable.packageType);
+
+        if (dropZone == null) {
+            Debug.LogWarning("No drop zone found for package type " + pickupable.packageType);
+            moveToPointPublisher.ClearTarget();
+            pickupZone.Drop();
+            yield break;
+        }
 
         moveToPointPublisher.SetTarget(dropZone.transform);
-
         Debug.Log("Going to drop zone: " + dropZone.name);
 
         yield return new WaitUntil(() => {
@@ -113,10 +111,9 @@ public class Manager : MonoBehaviour {
         yield return new WaitForSeconds(settleTime);
 
         moveToPointPublisher.ClearTarget();
-
         pickupZone.Drop();
 
-        Debug.Log("Dropped " + package.name + " at " + dropZone.name);
+        Debug.Log("Dropped " + actualPackage.name + " at " + dropZone.name);
 
         yield return new WaitForSeconds(settleTime);
     }
@@ -125,9 +122,7 @@ public class Manager : MonoBehaviour {
         foreach (Transform child in dropZonesParent.transform) {
             DropZone dropZone = child.GetComponent<DropZone>();
 
-            if (dropZone != null && dropZone.packageType == packageType) {
-                return dropZone;
-            }
+            if (dropZone != null && dropZone.packageType == packageType) return dropZone;
         }
 
         return null;
