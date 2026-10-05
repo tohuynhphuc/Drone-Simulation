@@ -25,13 +25,12 @@ public class PackageSpawner : MonoBehaviour {
             Vector3 randomOffset = new Vector3(
                 (Random.value * 2 - 1) * halfWidth,
                 (Random.value * 2 - 1) * halfHeight,
-                (Random.value * 2 - 1) * halfWidth
+                (Random.value * 2 - 1) * halfLength
             );
 
             package.transform.position = originalPosition + randomOffset;
 
-            PackageType randomType = (PackageType) Random.Range(
-                0,
+            PackageType randomType = (PackageType) Random.Range(0,
                 System.Enum.GetValues(typeof(PackageType)).Length
             );
 

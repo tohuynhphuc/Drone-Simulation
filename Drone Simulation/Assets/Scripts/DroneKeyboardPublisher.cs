@@ -3,16 +3,16 @@ using Unity.Robotics.ROSTCPConnector;
 using UnityEngine;
 
 public class DroneKeyboardPublisher : MonoBehaviour {
-    [SerializeField] private string topicName = "/drone/cmd_vel";
-    
+
+    [SerializeField] private string cmdKeyboardTopic = "/drone/cmd_keyboard_vel";
     [SerializeField] private DroneFlightController controller;
 
     private ROSConnection ros;
 
     private void Start() {
-	    if (Manager.Instance.UseROS) {
-		ros = ROSConnection.GetOrCreateInstance();
-		ros.RegisterPublisher<TwistMsg>(topicName);
+        if (Manager.Instance.UseROS) {
+            ros = ROSConnection.GetOrCreateInstance();
+            ros.RegisterPublisher<TwistMsg>(cmdKeyboardTopic);
         }
     }
 
@@ -55,10 +55,10 @@ public class DroneKeyboardPublisher : MonoBehaviour {
             message.angular.z = 1.0;
         }
 
-	if (Manager.Instance.UseROS) {
-            ros.Publish(topicName, message);
+        if (Manager.Instance.UseROS) {
+            ros.Publish(cmdKeyboardTopic, message);
         } else {
-        	controller.ReceiveCommand(message);
+            controller.ReceiveCommand(message);
         }
     }
 }

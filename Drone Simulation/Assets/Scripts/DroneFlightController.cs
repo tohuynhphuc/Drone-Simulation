@@ -39,18 +39,11 @@ public class DroneFlightController : MonoBehaviour {
 
     private void Start() {
         body = GetComponent<ArticulationBody>();
-
         if (!body.isRoot) {
             Debug.LogError("DroneFlightController must be attached to the root ArticulationBody!");
         }
 
-        ArticulationBody[] bodies = transform.root.GetComponentsInChildren<ArticulationBody>();
-
-        totalMass = 0f;
-
-        foreach (ArticulationBody part in bodies) {
-            totalMass += part.mass;
-        }
+        calculateTotalMass();
 
         body.linearDamping = linearDamping;
         body.angularDamping = angularDamping;
@@ -64,8 +57,16 @@ public class DroneFlightController : MonoBehaviour {
 
         command = new TwistMsg();
         lastCommandTime = -999f;
+    }
 
-        Debug.Log("Total drone mass: " + totalMass);
+    private void calculateTotalMass() {
+        ArticulationBody[] bodies = transform.root.GetComponentsInChildren<ArticulationBody>();
+
+        totalMass = 0f;
+
+        foreach (ArticulationBody part in bodies) {
+            totalMass += part.mass;
+        }
     }
 
     public void ReceiveCommand(TwistMsg message) {
@@ -140,8 +141,10 @@ public class DroneFlightController : MonoBehaviour {
          * When the drone tilts, transform.up is no longer completely
          * vertical, so increase total thrust to compensate.
          */
-        float verticalRatio = Vector3.Dot(transform.up, Vector3.up); // 1 when they match (upright), 0 when orthogonal (sideway)
-        verticalRatio = Mathf.Clamp(verticalRatio, 0.4f, 1f); // drone can only tilt by 60deg
+        // 1 when they match (upright), 0 when orthogonal (sideway)
+        float verticalRatio = Vector3.Dot(transform.up, Vector3.up); 
+        // drone can only tilt by 60deg
+        verticalRatio = Mathf.Clamp(verticalRatio, 0.4f, 1f);
 
         float hoverForce = weight / verticalRatio;
         float verticalCorrection = verticalError * verticalStrength * totalMass;
