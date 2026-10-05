@@ -6,6 +6,16 @@ import rospy
 from geometry_msgs.msg import Twist, Point, PoseStamped
 from tf.transformations import euler_from_quaternion
 
+STOP_HORIZONTAL = 0.25
+STOP_VERTICAL = 0.04
+SLOW_DISTANCE = 2.0
+
+MAX_HORIZONTAL_SPEED = 1.0
+MAX_VERTICAL_SPEED = 0.6
+
+YAW_GAIN = 0.8
+VERTICAL_GAIN = 0.8
+
 
 class GoToPoint:
     def __init__(self):
@@ -54,16 +64,6 @@ class GoToPoint:
 
         cmd = Twist()
 
-        STOP_HORIZONTAL = 0.25
-        STOP_VERTICAL = 0.04
-        SLOW_DISTANCE = 2.0
-
-        MAX_HORIZONTAL_SPEED = 1.0
-        MAX_VERTICAL_SPEED = 0.6
-
-        YAW_GAIN = 0.8
-        VERTICAL_GAIN = 0.8
-
         # Goal reached
         if horizontal_distance < STOP_HORIZONTAL and abs(dz) < STOP_VERTICAL:
             cmd.linear.x = 0.0
@@ -84,9 +84,8 @@ class GoToPoint:
             if horizontal_distance < STOP_HORIZONTAL:
                 horizontal_speed = 0.0
             elif horizontal_distance < SLOW_DISTANCE:
-                horizontal_speed = (
-                    (horizontal_distance - STOP_HORIZONTAL)
-                    / (SLOW_DISTANCE - STOP_HORIZONTAL)
+                horizontal_speed = (horizontal_distance - STOP_HORIZONTAL) / (
+                    SLOW_DISTANCE - STOP_HORIZONTAL
                 )
                 horizontal_speed *= MAX_HORIZONTAL_SPEED
             else:
@@ -94,7 +93,9 @@ class GoToPoint:
 
             # Vertical speed
             vertical_speed = VERTICAL_GAIN * dz
-            vertical_speed = max(-MAX_VERTICAL_SPEED, min(MAX_VERTICAL_SPEED, vertical_speed))
+            vertical_speed = max(
+                -MAX_VERTICAL_SPEED, min(MAX_VERTICAL_SPEED, vertical_speed)
+            )
 
             if abs(dz) < STOP_VERTICAL:
                 vertical_speed = 0.0
@@ -107,7 +108,5 @@ class GoToPoint:
 
 if __name__ == "__main__":
     rospy.init_node("go_to_point")
-
     controller = GoToPoint()
-
     rospy.spin()

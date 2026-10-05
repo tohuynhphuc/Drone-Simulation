@@ -1,9 +1,9 @@
 using UnityEngine;
 
 public class CameraFollowDrone : MonoBehaviour {
+
     [SerializeField] private Vector3 offset;
     [SerializeField] private Vector3 rotationOffset;
-
     [SerializeField] private Transform drone;
 
     private void LateUpdate() {
@@ -15,4 +15,5 @@ public class CameraFollowDrone : MonoBehaviour {
         transform.position = targetPosition;
         transform.rotation = targetRotation;
     }
+
 }

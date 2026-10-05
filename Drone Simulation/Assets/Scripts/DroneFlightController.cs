@@ -3,6 +3,7 @@ using Unity.Robotics.ROSTCPConnector;
 using UnityEngine;
 
 public class DroneFlightController : MonoBehaviour {
+
     [SerializeField] private string topicName = "/drone/cmd_vel";
 
     [Header("Horizontal Movement")]
@@ -63,7 +64,6 @@ public class DroneFlightController : MonoBehaviour {
         ArticulationBody[] bodies = transform.root.GetComponentsInChildren<ArticulationBody>();
 
         totalMass = 0f;
-
         foreach (ArticulationBody part in bodies) {
             totalMass += part.mass;
         }
@@ -81,10 +81,10 @@ public class DroneFlightController : MonoBehaviour {
         float yawCommand = 0f;
 
         if (Time.time - lastCommandTime <= commandTimeout) {
-            forwardCommand = Mathf.Clamp((float)command.linear.x, -1f, 1f);
-            sidewaysCommand = Mathf.Clamp((float)command.linear.y, -1f, 1f);
-            verticalCommand = Mathf.Clamp((float)command.linear.z, -1f, 1f);
-            yawCommand = Mathf.Clamp((float)-command.angular.z, -1f, 1f);
+            forwardCommand = Mathf.Clamp((float) command.linear.x, -1f, 1f);
+            sidewaysCommand = Mathf.Clamp((float) command.linear.y, -1f, 1f);
+            verticalCommand = Mathf.Clamp((float) command.linear.z, -1f, 1f);
+            yawCommand = Mathf.Clamp((float) -command.angular.z, -1f, 1f);
         }
 
         ControlRotation(forwardCommand, sidewaysCommand, yawCommand);
@@ -142,7 +142,7 @@ public class DroneFlightController : MonoBehaviour {
          * vertical, so increase total thrust to compensate.
          */
         // 1 when they match (upright), 0 when orthogonal (sideway)
-        float verticalRatio = Vector3.Dot(transform.up, Vector3.up); 
+        float verticalRatio = Vector3.Dot(transform.up, Vector3.up);
         // drone can only tilt by 60deg
         verticalRatio = Mathf.Clamp(verticalRatio, 0.4f, 1f);
 
